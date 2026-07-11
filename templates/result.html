@@ -20,39 +20,39 @@
 
         .main-title {
             text-align: center;
-            margin-top: 30px;
+            margin-top: clamp(20px, 5vw, 30px);
             margin-bottom: 10px;
-            font-size: 44px;
+            font-size: clamp(28px, 8vw, 44px);
             font-weight: bold;
         }
 
         .subtitle {
             text-align: center;
             color: #94a3b8;
-            font-size: 16px;
-            margin-bottom: 40px;
+            font-size: clamp(13px, 3vw, 16px);
+            margin-bottom: 30px;
         }
 
         .card-custom {
             background: #1e293b;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: clamp(15px, 4vw, 25px);
+            margin-bottom: 15px;
             box-shadow: 0px 0px 15px rgba(56, 189, 248, 0.15);
         }
 
         h4 {
             color: #38bdf8;
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 12px;
+            font-size: clamp(13px, 3vw, 16px);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .value {
             color: white;
-            font-size: 18px;
-            word-break: break-all;
+            font-size: clamp(14px, 3vw, 18px);
+            word-break: break-word;
         }
 
         /* Input type badge */
@@ -98,16 +98,17 @@
         /* Key display */
         .key-box {
             font-family: monospace;
-            font-size: 18px;
-            letter-spacing: 3px;
+            font-size: clamp(12px, 3vw, 18px);
+            letter-spacing: 2px;
             color: #38bdf8;
             word-break: break-all;
+            overflow-wrap: break-word;
         }
 
         /* Leakage result boxes */
         .result-box {
             text-align: center;
-            padding: 28px 20px;
+            padding: clamp(20px, 5vw, 28px);
             border-radius: 15px;
             background: #111827;
             height: 100%;
@@ -124,14 +125,14 @@
         .leakage-label-3 { color: #ef4444; }
 
         .big-label {
-            font-size: 30px;
+            font-size: clamp(24px, 6vw, 30px);
             font-weight: bold;
             margin-top: 8px;
         }
 
         /* Confidence gauge */
         .confidence-number {
-            font-size: 52px;
+            font-size: clamp(36px, 10vw, 52px);
             font-weight: bold;
             color: #facc15;
             line-height: 1;
@@ -159,17 +160,42 @@
         }
 
         .btn-home {
-            margin-top: 20px;
-            margin-bottom: 40px;
+            margin-top: 25px;
+            margin-bottom: 30px;
         }
 
-        /* Section divider label */
-        .section-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #475569;
-            margin-bottom: 16px;
+        .btn-home .btn {
+            font-size: clamp(14px, 3vw, 16px);
+            padding: clamp(10px, 3vw, 12px) clamp(15px, 5vw, 25px);
+            touch-action: manipulation;
+        }
+
+        /* Mobile stacking */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .row {
+                margin-left: -6px;
+                margin-right: -6px;
+            }
+
+            .col-md-5,
+            .col-md-6,
+            .col-md-7 {
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            .text-preview {
+                max-height: 100px;
+                font-size: 12px;
+            }
+
+            .cipher-box {
+                font-size: 11px;
+            }
         }
 
     </style>
