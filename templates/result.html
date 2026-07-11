@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analysis Result</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-title {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            font-size: 44px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .card-custom {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 15px rgba(56, 189, 248, 0.15);
+        }
+
+        h4 {
+            color: #38bdf8;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .value {
+            color: white;
+            font-size: 18px;
+            word-break: break-all;
+        }
+
+        /* Input type badge */
+        .input-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .badge-text  { background: #1e3a5f; color: #38bdf8; border: 1px solid #38bdf8; }
+        .badge-pdf   { background: #3b1f5e; color: #a78bfa; border: 1px solid #a78bfa; }
+        .badge-image { background: #1a3b2e; color: #34d399; border: 1px solid #34d399; }
+
+        /* Extracted text preview */
+        .text-preview {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
+            color: #cbd5e1;
+            max-height: 120px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Cipher text */
+        .cipher-box {
+            background: #0f172a;
+            border: 1px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #7dd3fc;
+            word-break: break-all;
+        }
+
+        /* Key display */
+        .key-box {
+            font-family: monospace;
+            font-size: 18px;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            word-break: break-all;
+        }
+
+        /* Leakage result boxes */
+        .result-box {
+            text-align: center;
+            padding: 28px 20px;
+            border-radius: 15px;
+            background: #111827;
+            height: 100%;
+        }
+
+        .leakage-0 { box-shadow: 0px 0px 20px rgba(34, 197, 94, 0.35);  }
+        .leakage-1 { box-shadow: 0px 0px 20px rgba(250, 204, 21, 0.35); }
+        .leakage-2 { box-shadow: 0px 0px 20px rgba(249, 115, 22, 0.35); }
+        .leakage-3 { box-shadow: 0px 0px 20px rgba(239, 68, 68, 0.35);  }
+
+        .leakage-label-0 { color: #22c55e; }
+        .leakage-label-1 { color: #facc15; }
+        .leakage-label-2 { color: #f97316; }
+        .leakage-label-3 { color: #ef4444; }
+
+        .big-label {
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        /* Confidence gauge */
+        .confidence-number {
+            font-size: 52px;
+            font-weight: bold;
+            color: #facc15;
+            line-height: 1;
+        }
+
+        .confidence-bar-wrap {
+            background: #1e293b;
+            border-radius: 10px;
+            height: 12px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #facc15, #f97316);
+            transition: width 1s ease;
+        }
+
+        /* Trace chart */
+        canvas {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        .btn-home {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Section divider label */
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #475569;
+            margin-bottom: 16px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="main-title">Analysis Result</h1>
+    <p class="subtitle">AES Side-Channel Leakage Analysis via Deep Learning</p>
+
+    <!-- ── Row 1: Input source + Extracted text ── -->
+    <div class="row">
+
+        <div class="col-md-5">
+            <div class="card-custom h-100">
+                <h4>Input Source</h4>
+
+                <style>
+                    .badge-docx  { background: #1a2e1a; color: #4ade80; border: 1px solid #4ade80; }
+                    .badge-audio { background: #2d1f3d; color: #c084fc; border: 1px solid #c084fc; }
+                </style>
+
+                {% if input_type == 'text' %}
+                    <span class="input-badge badge-text">📝 Plain Text</span>
+                {% elif input_type == 'pdf' %}
+                    <span class="input-badge badge-pdf">📄 PDF File</span>
+                {% elif input_type == 'docx' %}
+                    <span class="input-badge badge-docx">📃 Word Document</span>
+                {% elif input_type == 'image' %}
+                    <span class="input-badge badge-image">🖼 Image</span>
+                {% elif input_type == 'audio' %}
+                    <span class="input-badge badge-audio">🎵 Audio</span>
+                {% endif %}
+
+                <div class="value mt-2" style="font-size:14px; color:#94a3b8;">
+                    {{ input_label }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card-custom h-100">
+                <h4>Extracted / Input Text</h4>
+                <div class="text-preview">{{ plaintext }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Row 2: AES Key + Cipher text ── -->
+    <div class="row">
+
+        <div class="col-md-5">
+            <div class="card-custom h-100">
+                <h4>🔑 Auto-Generated AES Key</h4>
+                <div class="key-box">{{ key_hex }}</div>
+                <small style="color:#475569; font-size:12px; margin-top:8px; display:block;">
+                    128-bit · ECB mode · Generated fresh for this session
+                </small>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card-custom h-100">
+                <h4>🔒 Cipher Text (Base64)</h4>
+                <div class="cipher-box">{{ ciphertext }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Row 3: Leakage level + Confidence ── -->
+    <div class="row">
+
+        <div class="col-md-6 mb-4">
+            <div class="result-box leakage-{{ predicted_class }}">
+                <h4>Predicted Leakage Level</h4>
+                <div class="big-label leakage-label-{{ predicted_class }}">
+                    {{ predicted_label }}
+                </div>
+                <div style="color:#475569; font-size:13px; margin-top:10px;">
+                    Class {{ predicted_class }} / 3
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="result-box" style="box-shadow:0px 0px 20px rgba(250,204,21,0.25);">
+                <h4>Confidence Score</h4>
+                <div class="confidence-number">{{ confidence }}%</div>
+                <div class="confidence-bar-wrap">
+                    <div class="confidence-bar" style="width: {{ confidence }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Analysis Summary ── -->
+    <div class="card-custom">
+        <h4>Analysis Summary</h4>
+        <p style="color:#cbd5e1; line-height:1.8;">
+            {% if input_type == 'text' %}
+                The input plain text was
+            {% elif input_type == 'pdf' %}
+                Text extracted from the uploaded PDF was
+            {% elif input_type == 'docx' %}
+                Text extracted from the uploaded Word document was
+            {% elif input_type == 'image' %}
+                Pixel statistics extracted from the uploaded image were
+            {% elif input_type == 'audio' %}
+                Waveform statistics extracted from the uploaded audio file were
+            {% endif %}
+            encrypted using AES-128 in ECB mode with an automatically generated key.
+            A simulated side-channel power trace was then generated and fed into a
+            trained <strong style="color:#38bdf8;">Convolutional Neural Network (CNN)</strong>,
+            which classified the leakage characteristics as
+            <strong class="leakage-label-{{ predicted_class }}">{{ predicted_label }}</strong>
+            with a confidence of <strong style="color:#facc15;">{{ confidence }}%</strong>.
+        </p>
+    </div>
+
+    <!-- ── Power Trace Chart ── -->
+    <div class="card-custom">
+        <h4>Simulated Side-Channel Power Trace</h4>
+        <canvas id="traceChart"></canvas>
+    </div>
+
+    <div class="text-center btn-home">
+        <a href="/" class="btn btn-primary btn-lg">
+            ← Analyze Another Input
+        </a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const traceData = {{ trace_data | tojson }};
+const leakageClass = {{ predicted_class }};
+
+const traceColors = ['#22c55e', '#facc15', '#f97316', '#ef4444'];
+const lineColor = traceColors[leakageClass] || '#38bdf8';
+
+new Chart(document.getElementById('traceChart'), {
+    type: 'line',
+    data: {
+        labels: traceData.map((_, i) => i),
+        datasets: [{
+            label: 'Power Consumption',
+            data: traceData,
+            borderColor: lineColor,
+            backgroundColor: lineColor + '22',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        animation: { duration: 800 },
+        plugins: {
+            legend: { labels: { color: 'white' } }
+        },
+        scales: {
+            x: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } }
+        }
+    }
+});
+
+</script>
+
+</body>
+
+</html>
