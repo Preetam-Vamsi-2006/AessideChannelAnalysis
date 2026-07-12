@@ -64,6 +64,6 @@ loss, accuracy = model.evaluate(X_test, y_test)
 
 print("Accuracy:", accuracy)
 
-model.save("model/cnn_model.h5")
+model.save("model/cnn_model.keras")
 
 print("Model Saved")

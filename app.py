@@ -20,7 +20,7 @@ from PIL import Image
 app = Flask(__name__)
 
 # Load CNN Model
-model = load_model("model/cnn_model.h5")
+model = load_model("model/cnn_model.keras")
 
 
 # ── Helpers ──────────────────────────────────────────────
