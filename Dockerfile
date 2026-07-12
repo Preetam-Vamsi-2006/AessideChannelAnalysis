@@ -7,4 +7,6 @@ RUN pip install --no-cache-dir flask gunicorn pycryptodome PyPDF2 python-docx Pi
 
 COPY . .
 
-CMD ["gunicorn", "app:app"]
+EXPOSE 8000
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
