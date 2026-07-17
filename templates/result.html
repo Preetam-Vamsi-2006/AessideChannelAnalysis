@@ -290,7 +290,7 @@
                 <h4>Confidence Score</h4>
                 <div class="confidence-number">{{ confidence }}%</div>
                 <div class="confidence-bar-wrap">
-                    <div class="confidence-bar" style="width: {{ confidence }}%;"></div>
+                    <div class="confidence-bar" style="width: 0%; display: none;" data-width="{{ confidence }}"></div>
                 </div>
             </div>
         </div>
@@ -319,6 +319,19 @@
             <strong class="leakage-label-{{ predicted_class }}">{{ predicted_label }}</strong>
             with a confidence of <strong style="color:#facc15;">{{ confidence }}%</strong>.
         </p>
+        
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+            <button id="encryptionTimeBtn" class="btn btn-info" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9); border: none; padding: 10px 20px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+                ⏱ Encryption Time
+            </button>
+            <button id="decryptBtn" class="btn btn-success" style="background: linear-gradient(135deg, #34d399, #10b981); border: none; padding: 10px 20px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+                🔓 Decrypt
+            </button>
+            <button id="powerChartBtn" class="btn btn-warning" style="background: linear-gradient(135deg, #f97316, #ea580c); border: none; padding: 10px 20px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+                ⚡ Power Consumption
+            </button>
+        </div>
     </div>
 
     <!-- ── Power Trace Chart ── -->
@@ -335,15 +348,259 @@
 
 </div>
 
+<!-- ── ENCRYPTION TIME MODAL ── -->
+<div id="encryptionTimeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: #1e293b; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; color: white; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #38bdf8;">⏱ Encryption Time</h2>
+            <button onclick="closeModal('encryptionTimeModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0;">&times;</button>
+        </div>
+        <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+            <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 15px;">
+                <strong>Encryption Duration:</strong>
+            </div>
+            <div style="font-size: 32px; color: #38bdf8; font-weight: bold; margin-bottom: 10px;">
+                {{ encryption_time_ms }} ms
+            </div>
+            <div style="font-size: 13px; color: #64748b;">
+                This is the time taken to encrypt the input using AES-128 ECB mode with the auto-generated key.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── DECRYPTION MODAL ── -->
+<div id="decryptionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow-y: auto; padding: 20px 0;">
+    <div style="background: #1e293b; border-radius: 15px; padding: 30px; max-width: 600px; width: 90%; margin: 50px auto; color: white; box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #34d399;">🔓 Decrypt Ciphertext</h2>
+            <button onclick="closeModal('decryptionModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0;">&times;</button>
+        </div>
+        
+        <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Key (Hex):</div>
+            <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; margin-bottom: 15px;">{{ key_hex }}</div>
+            
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Ciphertext (Base64):</div>
+            <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; max-height: 100px; overflow-y: auto;">{{ ciphertext }}</div>
+        </div>
+
+        <button onclick="performDecryption()" style="width: 100%; background: linear-gradient(135deg, #34d399, #10b981); border: none; padding: 12px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
+            Decrypt
+        </button>
+
+        <div id="decryptionResult" style="display: none; background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Decrypted Plaintext:</div>
+            <div id="decryptedText" style="font-family: monospace; font-size: 13px; color: #cbd5e1; word-break: break-word; white-space: pre-wrap; padding: 10px; background: #111827; border-radius: 8px;"></div>
+        </div>
+
+        <div id="decryptionError" style="display: none; background: #7f1d1d; padding: 15px; border-radius: 8px; border: 1px solid #dc2626; color: #fca5a5; font-size: 13px; margin-top: 15px;"></div>
+    </div>
+</div>
+
+<!-- ── POWER CONSUMPTION MODAL ── -->
+<div id="powerChartModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow-y: auto; padding: 20px 0;">
+    <div style="background: #1e293b; border-radius: 15px; padding: 30px; max-width: 700px; width: 90%; margin: 50px auto; color: white; box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #f97316;">⚡ Power Consumption Analysis</h2>
+            <button onclick="closeModal('powerChartModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0;">&times;</button>
+        </div>
+        
+        <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+            <canvas id="powerModalChart" style="max-height: 300px;"></canvas>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 10px; border: 1px solid #334155; font-size: 13px; color: #cbd5e1;">
+            <strong style="color: #f97316;">Power Trace Analysis:</strong>
+            <p style="margin: 10px 0 0 0; color: #94a3b8;">This chart shows the simulated side-channel power trace used for the CNN leakage classification. The trace characteristics were analyzed to predict the leakage level.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Styling -->
+<style>
+    /* Modal Overlay */
+    [id$="Modal"][style*="display: none"], 
+    [id$="Modal"] {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Modal Content Animation */
+    [id$="Modal"] > div {
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
-const traceData = {{ trace_data | tojson }};
-const leakageClass = {{ predicted_class }};
+const traceData = JSON.parse('{{ trace_data | tojson | safe }}');
+const leakageClass = parseInt('{{ predicted_class }}');
+const keyHex = '{{ key_hex }}';
+const ciphertextB64 = '{{ ciphertext }}';
 
 const traceColors = ['#22c55e', '#facc15', '#f97316', '#ef4444'];
 const lineColor = traceColors[leakageClass] || '#38bdf8';
+
+// Set confidence bar width
+document.addEventListener('DOMContentLoaded', function() {
+    const confBar = document.querySelector('.confidence-bar');
+    if (confBar) {
+        confBar.style.width = leakageClass + '%';
+        confBar.style.display = 'block';
+    }
+
+    // Initialize button event listeners
+    document.getElementById('encryptionTimeBtn').addEventListener('click', function() {
+        openModal('encryptionTimeModal');
+    });
+
+    document.getElementById('decryptBtn').addEventListener('click', function() {
+        openModal('decryptionModal');
+        // Clear previous results
+        document.getElementById('decryptionResult').style.display = 'none';
+        document.getElementById('decryptionError').style.display = 'none';
+        document.getElementById('decryptedText').textContent = '';
+    });
+
+    document.getElementById('powerChartBtn').addEventListener('click', function() {
+        openModal('powerChartModal');
+        setTimeout(initPowerModalChart, 100);
+    });
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAllModals();
+        }
+    });
+
+    // Close modals on outside click
+    document.addEventListener('click', function(e) {
+        if (e.target.id.endsWith('Modal')) {
+            closeModal(e.target.id);
+        }
+    });
+});
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function closeAllModals() {
+    ['encryptionTimeModal', 'decryptionModal', 'powerChartModal'].forEach(id => {
+        closeModal(id);
+    });
+}
+
+async function performDecryption() {
+    const resultDiv = document.getElementById('decryptionResult');
+    const errorDiv = document.getElementById('decryptionError');
+    const textDiv = document.getElementById('decryptedText');
+
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    textDiv.textContent = '';
+
+    try {
+        const response = await fetch('/decrypt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                key_hex: keyHex,
+                ciphertext: ciphertextB64
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            errorDiv.textContent = 'Error: ' + (data.error || 'Decryption failed');
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        textDiv.textContent = data.plaintext;
+        resultDiv.style.display = 'block';
+    } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+let powerModalChart = null;
+
+function initPowerModalChart() {
+    const ctx = document.getElementById('powerModalChart');
+    if (!ctx) return;
+
+    // Destroy previous chart if exists
+    if (powerModalChart) {
+        powerModalChart.destroy();
+    }
+
+    powerModalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: traceData.map((_, i) => i),
+            datasets: [{
+                label: 'Power Consumption',
+                data: traceData,
+                borderColor: lineColor,
+                backgroundColor: lineColor + '22',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: { duration: 800 },
+            plugins: {
+                legend: { labels: { color: 'white' } }
+            },
+            scales: {
+                x: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
+                y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } }
+            }
+        }
+    });
+}
 
 new Chart(document.getElementById('traceChart'), {
     type: 'line',

@@ -6,6 +6,7 @@ import io
 import wave
 import struct
 import numpy as np
+import time
 from tensorflow.keras.models import load_model
 
 # PDF extraction
@@ -40,10 +41,14 @@ def pad(text):
 
 
 def aes_encrypt(text, key_bytes):
-    """Encrypt text with raw 16-byte key. Returns base64 ciphertext."""
+    """Encrypt text with raw 16-byte key. Returns (base64_ciphertext, encryption_time_ms)."""
+    start = time.perf_counter()
     cipher = AES.new(key_bytes, AES.MODE_ECB)
     encrypted = cipher.encrypt(pad(text).encode('utf-8'))
-    return base64.b64encode(encrypted).decode()
+    end = time.perf_counter()
+    encryption_time_ms = (end - start) * 1000
+    ciphertext = base64.b64encode(encrypted).decode()
+    return ciphertext, encryption_time_ms
 
 
 def extract_text_from_pdf(file_bytes):
@@ -205,6 +210,34 @@ def home():
     return render_template('index.html')
 
 
+@app.route('/decrypt', methods=['POST'])
+def decrypt():
+    """Decrypt ciphertext using the provided key."""
+    try:
+        key_hex = request.json.get('key_hex', '')
+        ciphertext_b64 = request.json.get('ciphertext', '')
+        
+        if not key_hex or not ciphertext_b64:
+            return {'error': 'Missing key or ciphertext'}, 400
+        
+        # Convert hex key to bytes
+        raw_key = bytes.fromhex(key_hex)
+        
+        # Decode base64 ciphertext
+        ciphertext_bytes = base64.b64decode(ciphertext_b64)
+        
+        # Decrypt
+        cipher = AES.new(raw_key, AES.MODE_ECB)
+        decrypted = cipher.decrypt(ciphertext_bytes)
+        
+        # Remove padding and decode
+        plaintext = decrypted.rstrip(b' ').decode('utf-8', errors='ignore')
+        
+        return {'plaintext': plaintext}, 200
+    except Exception as e:
+        return {'error': str(e)}, 400
+
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
 
@@ -258,7 +291,7 @@ def analyze():
     # ── 2. Auto-generate AES key and encrypt ─────────────
     raw_key  = os.urandom(16)
     key_hex  = raw_key.hex().upper()
-    ciphertext = aes_encrypt(plaintext, raw_key)
+    ciphertext, encryption_time_ms = aes_encrypt(plaintext, raw_key)
 
     # ── 3. CNN side-channel analysis ──────────────────────
     predicted_class, predicted_label, confidence, trace_points = run_cnn_analysis(input_trace)
@@ -276,7 +309,8 @@ def analyze():
         predicted_class=predicted_class,
         predicted_label=predicted_label,
         confidence=confidence,
-        trace_data=trace_points
+        trace_data=trace_points,
+        encryption_time_ms=round(encryption_time_ms, 4)
     )
 
 
