@@ -377,24 +377,39 @@
             <button onclick="closeModal('decryptionModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0;">&times;</button>
         </div>
         
-        <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Key (Hex):</div>
-            <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; margin-bottom: 15px;">{{ key_hex }}</div>
-            
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Ciphertext (Base64):</div>
-            <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; max-height: 100px; overflow-y: auto;">{{ ciphertext }}</div>
-        </div>
+        {% if input_type == 'image' and file_data_b64 %}
+            <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Uploaded Image:</div>
+                <img src="data:image/png;base64,{{ file_data_b64 }}" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: block; margin: 0 auto;">
+            </div>
+        {% elif input_type == 'audio' and file_data_b64 %}
+            <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Uploaded Audio:</div>
+                <audio controls style="width: 100%; margin: 10px 0; border-radius: 8px;">
+                    <source src="data:audio/wav;base64,{{ file_data_b64 }}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        {% else %}
+            <div style="background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Key (Hex):</div>
+                <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; margin-bottom: 15px;">{{ key_hex }}</div>
+                
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Ciphertext (Base64):</div>
+                <div style="font-family: monospace; font-size: 12px; color: #7dd3fc; word-break: break-all; padding: 10px; background: #111827; border-radius: 8px; max-height: 100px; overflow-y: auto;">{{ ciphertext }}</div>
+            </div>
 
-        <button onclick="performDecryption()" style="width: 100%; background: linear-gradient(135deg, #34d399, #10b981); border: none; padding: 12px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
-            Decrypt
-        </button>
+            <button onclick="performDecryption()" style="width: 100%; background: linear-gradient(135deg, #34d399, #10b981); border: none; padding: 12px; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
+                Decrypt
+            </button>
 
-        <div id="decryptionResult" style="display: none; background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Decrypted Plaintext:</div>
-            <div id="decryptedText" style="font-family: monospace; font-size: 13px; color: #cbd5e1; word-break: break-word; white-space: pre-wrap; padding: 10px; background: #111827; border-radius: 8px;"></div>
-        </div>
+            <div id="decryptionResult" style="display: none; background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Decrypted Plaintext:</div>
+                <div id="decryptedText" style="font-family: monospace; font-size: 13px; color: #cbd5e1; word-break: break-word; white-space: pre-wrap; padding: 10px; background: #111827; border-radius: 8px;"></div>
+            </div>
 
-        <div id="decryptionError" style="display: none; background: #7f1d1d; padding: 15px; border-radius: 8px; border: 1px solid #dc2626; color: #fca5a5; font-size: 13px; margin-top: 15px;"></div>
+            <div id="decryptionError" style="display: none; background: #7f1d1d; padding: 15px; border-radius: 8px; border: 1px solid #dc2626; color: #fca5a5; font-size: 13px; margin-top: 15px;"></div>
+        {% endif %}
     </div>
 </div>
 

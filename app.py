@@ -19,6 +19,7 @@ from docx import Document
 from PIL import Image
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 # Load CNN Model (gracefully handle load errors)
 model = None
@@ -245,6 +246,7 @@ def analyze():
     plaintext   = ""
     input_label = ""
     input_trace = None   # set for image and audio
+    file_data_b64 = None # base64 encoded file for display
 
     # ── 1. Extract data based on input type ──────────────
     if input_type == 'text':
@@ -275,15 +277,21 @@ def analyze():
         img_file = request.files.get('image_file')
         if not img_file or img_file.filename == '':
             return render_template('index.html', error="Please upload an image file.")
-        plaintext, input_trace = analyze_image(img_file.read())
+        img_bytes = img_file.read()
+        plaintext, input_trace = analyze_image(img_bytes)
         input_label = f"Image — {img_file.filename}"
+        # Store base64 encoded image for display
+        file_data_b64 = base64.b64encode(img_bytes).decode()
 
     elif input_type == 'audio':
         audio_file = request.files.get('audio_file')
         if not audio_file or audio_file.filename == '':
             return render_template('index.html', error="Please upload an audio file.")
-        plaintext, input_trace = analyze_audio(audio_file.read())
+        audio_bytes = audio_file.read()
+        plaintext, input_trace = analyze_audio(audio_bytes)
         input_label = f"Audio — {audio_file.filename}"
+        # Store base64 encoded audio for display
+        file_data_b64 = base64.b64encode(audio_bytes).decode()
 
     else:
         return render_template('index.html', error="Unknown input type.")
@@ -310,7 +318,8 @@ def analyze():
         predicted_label=predicted_label,
         confidence=confidence,
         trace_data=trace_points,
-        encryption_time_ms=round(encryption_time_ms, 4)
+        encryption_time_ms=round(encryption_time_ms, 4),
+        file_data_b64=file_data_b64
     )
 
 
